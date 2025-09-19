@@ -1,0 +1,3 @@
+Agrega la funcionalidad de agrupar hábitos por categorías (ej. Salud, Productividad, Personal).
+* En la lista principal debe mostrarse un encabezado por categoría.
+* Debe poder marcarse como completado igual que antes.

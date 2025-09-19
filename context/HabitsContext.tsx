@@ -118,6 +118,7 @@ export const HabitsProvider: React.FC<HabitsProviderProps> = ({ children }) => {
         dayOfWeek: apiHabit.dayOfWeek || "monday",
         description: apiHabit.description || undefined,
         _isLocal: false,
+        category: apiHabit.category || "Personal",
       } as LocalHabit);
     });
 

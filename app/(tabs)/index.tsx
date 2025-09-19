@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
+import { CategoryFilter } from "@/components/CategoryFilter";
 import { DayFilter } from "@/components/DayFilter";
 import { EmptyState } from "@/components/EmptyState";
 import { HabitForm } from "@/components/HabitForm";
@@ -20,30 +21,42 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { COLORS } from "@/constants/colors";
 import { useHabits } from "@/context/HabitsContext";
-import { DayOfWeek, Habit } from "@/types/habits";
+import { Category, DayOfWeek, Habit } from "@/types/habits";
 import { getTodayString } from "@/utils/date";
 
 export default function HomeScreen() {
-  const { state, addHabit, editHabit, deleteHabit, refreshHabits } = useHabits();
+  const { state, addHabit, editHabit, deleteHabit, refreshHabits } =
+    useHabits();
   const { habits, loading } = state;
   const [selectedDayFilter, setSelectedDayFilter] = useState<DayOfWeek | "all">(
     "all"
   );
+  const [selectedCategoryFilter, setSelectedCategoryFilter] =
+    useState<Category | null>(null);
+
   const [modalVisible, setModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
 
   const filteredHabits = useMemo(() => {
-    if (selectedDayFilter === "all") {
-      return habits;
-    }
-    return habits.filter(
-      (habit) => habit.dayOfWeek === selectedDayFilter
-    );
-  }, [habits, selectedDayFilter]);
+    return habits.filter((habit) => {
+      const dayMatch =
+        selectedDayFilter === "all" || habit.dayOfWeek === selectedDayFilter;
+
+      const categoryMatch =
+        !selectedCategoryFilter ||
+        habit.category.toLowerCase() === selectedCategoryFilter.toLowerCase();
+
+      return dayMatch && categoryMatch;
+    });
+  }, [habits, selectedDayFilter, selectedCategoryFilter]);
 
   const handleDayFilterChange = useCallback((day: DayOfWeek | "all") => {
     setSelectedDayFilter(day);
+  }, []);
+
+  const handleCategoryFilterChange = useCallback((cat: Category) => {
+    setSelectedCategoryFilter(cat);
   }, []);
 
   const handleAddHabit = useCallback(() => {
@@ -115,6 +128,13 @@ export default function HomeScreen() {
     });
   }, [refreshHabits]);
 
+  const CategoryHeader = (cat: Category) => {
+    return (
+      <ThemedText type="title" style={styles.title}>
+        {cat}
+      </ThemedText>
+    );
+  };
   return (
     <SafeAreaView style={styles.container}>
       <ThemedView style={styles.header}>
@@ -127,7 +147,11 @@ export default function HomeScreen() {
               onPress={handleRefreshPress}
               style={styles.refreshButton}
             >
-              <IconSymbol name="arrow.clockwise" size={24} color={COLORS.primaryDark} />
+              <IconSymbol
+                name="arrow.clockwise"
+                size={24}
+                color={COLORS.primaryDark}
+              />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleSettingsPress}
@@ -141,6 +165,10 @@ export default function HomeScreen() {
         <DayFilter
           selectedDay={selectedDayFilter}
           onDaySelect={handleDayFilterChange}
+        />
+        <CategoryFilter
+          selectedCategory={selectedCategoryFilter!}
+          onCategorySelect={handleCategoryFilterChange}
         />
       </ThemedView>
 
